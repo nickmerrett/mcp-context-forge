@@ -35,6 +35,17 @@ ARG MCPGATEWAY_UI_ENABLED=true
 ARG ENABLE_PROFILING=false
 # Base image overrides — defaults to UBI 10; pass UBI 9 values for FedRAMP builds
 #
+# THIS FORK (branch `ubi9`) DEFAULTS TO UBI 9.
+# Reason: RHEL/UBI 10 is built for the x86-64-v3 microarchitecture and cannot
+# start on a CPU without AVX2 — it dies immediately with
+#     Fatal glibc error: CPU does not support x86-64-v3
+# The target host is an Intel Atom C3758, which has no AVX2, so the ubi10
+# default is unusable there. UBI 9 targets the x86-64 baseline and runs.
+#
+# The ONLY difference from upstream v1.1.1 is the three ARG defaults below.
+# No source code is modified, so keeping upstream as a remote and rebasing this
+# branch per release stays cheap.
+#
 # FedRAMP/Dreadnought deployments MUST override these with images pulled from
 # an approved internal registry.
 # Public registry defaults (registry.access.redhat.com) are for standard builds only.
@@ -46,9 +57,9 @@ ARG ENABLE_PROFILING=false
 #     --build-arg NODEJS_IMAGE=<internal-registry>/ubi9/nodejs-20:latest \
 #     --build-arg UBI_MINIMAL=<internal-registry>/ubi9/ubi-minimal:latest \
 #     .
-ARG UBI_BASE=registry.access.redhat.com/ubi10:10.2-1793860810
-ARG NODEJS_IMAGE=registry.access.redhat.com/ubi10/nodejs-24:10.2-1794203173
-ARG UBI_MINIMAL=registry.access.redhat.com/ubi10/ubi-minimal:10.2-1793863917
+ARG UBI_BASE=registry.access.redhat.com/ubi9/ubi:latest
+ARG NODEJS_IMAGE=registry.access.redhat.com/ubi9/nodejs-22:latest
+ARG UBI_MINIMAL=registry.access.redhat.com/ubi9/ubi-minimal:latest
 # Wheel closure stage — used only for s390x and ppc64le where PyPI manylinux
 # binary wheels are unavailable (tiktoken/psycopg/cryptography require native
 # compilation, and psycopg-binary has no s390x wheel at all).
